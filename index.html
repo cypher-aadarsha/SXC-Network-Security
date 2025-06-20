@@ -162,10 +162,9 @@
         #preloader-text-container {
             font-family: 'Fira Code', monospace;
             font-size: 1.25rem; /* Increased font size */
-            line-height: 1.5;
             height: 2.5rem;
             width: 100%;
-            max-width: 650px;
+            max-width: 600px;
             text-align: left;
             padding: 0 1rem;
             color: #4ade80; /* Green terminal text */
@@ -214,12 +213,12 @@
         @keyframes glitch-anim-2 {
             0% { clip-path: inset(81% 0 8% 0); } 10% { clip-path: inset(6% 0 78% 0); } 20% { clip-path: inset(83% 0 3% 0); } 30% { clip-path: inset(30% 0 46% 0); } 40% { clip-path: inset(18% 0 79% 0); } 50% { clip-path: inset(73% 0 5% 0); } 60% { clip-path: inset(48% 0 44% 0); } 70% { clip-path: inset(94% 0 2% 0); } 80% { clip-path: inset(63% 0 14% 0); } 90% { clip-path: inset(25% 0 68% 0); } 100% { clip-path: inset(74% 0 19% 0); }
         }
+
         @keyframes fadeInShield {
             from { opacity: 0; transform: scale(0.5); }
             to { opacity: 1; transform: scale(1); }
         }
-        @keyframes blink { 50% { opacity: 0; } }
-        #cursor { animation: blink 1s step-end infinite; }
+
     </style>
 </head>
 <body class="antialiased">
@@ -233,7 +232,7 @@
                 </svg>
             </div>
             <div id="preloader-text-container">
-                <span id="preloader-text"></span><span id="cursor">_</span>
+                <span id="preloader-text"></span><span id="cursor" class="animate-ping">_</span>
             </div>
         </div>
     </div>
@@ -338,7 +337,8 @@
                 </div>
             </div>
         </section>
-                <!-- Team Section -->
+
+        <!-- Team Section -->
         <section id="team" class="py-20 bg-slate-900/50">
             <div class="container mx-auto px-6">
                 <h2 class="section-heading reveal">Meet The Core Team</h2>
@@ -400,7 +400,7 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </section>        
             <!-- Blog Section -->
             <section id="blog" class="py-20">
                 <div class="container mx-auto px-6">
@@ -468,6 +468,7 @@
         const preloader = document.getElementById('preloader');
         const mainContent = document.getElementById('main-content');
         const preloaderTextEl = document.getElementById('preloader-text');
+        const preloaderShield = document.getElementById('preloader-shield-container');
         const preloaderTextContainer = document.getElementById('preloader-text-container');
         const cursor = document.getElementById('cursor');
         const preloaderCanvas = document.getElementById('preloader-canvas');
@@ -477,53 +478,60 @@
             "[root@sxc ~]# Establishing secure channel...",
             "[root@sxc ~]# Bypassing network firewalls...",
             "[root@sxc ~]# Accessing encrypted grid...",
-            "[root@sxc ~]# Inaugurated By Honorable Er. Sanjay Kumar Yadav Sir...",
             "Welcome to the SXC Network Security"
         ];
         let textIndex = 0;
         let charIndex = 0;
 
         function typeText() {
-            cursor.style.display = 'inline';
-            cursor.style.animationName = 'none'; // Stop blinking during typing
+            cursor.style.animation = 'none'; // Stop blinking during typing
             if (textIndex < texts.length) {
-                // Set text color based on the line
-                if (textIndex === 3) { // Inauguration line
-                    preloaderTextContainer.style.color = '#c8242c';
-                    preloaderTextContainer.style.textShadow = '0 0 8px #c8242c';
-                } else if (textIndex === 4) { // Welcome line
-                    preloaderTextContainer.style.color = '#ffffff';
-                    preloaderTextContainer.style.textShadow = '0 0 8px #ffffff';
-                } else { // Standard terminal lines
-                    preloaderTextContainer.style.color = '#4ade80';
-                    preloaderTextContainer.style.textShadow = '0 0 5px #4ade80';
-                }
-
                 if (charIndex < texts[textIndex].length) {
                     preloaderTextEl.textContent += texts[textIndex].charAt(charIndex);
                     charIndex++;
-                    setTimeout(typeText, 40); // Adjusted typing speed
+                    // Add random glitches while typing
+                    if (Math.random() < 0.05) {
+                        applyGlitch(true);
+                    } else {
+                        applyGlitch(false);
+                    }
+                    setTimeout(typeText, 50);
                 } else {
                     // Finished typing a line
-                    cursor.style.animationName = 'blink'; // Resume blinking
+                    cursor.style.animation = '1s blink step-end infinite'; // Resume blinking
+                    applyGlitch(true, 1000); // Apply a strong glitch for 1s
                     setTimeout(() => {
                         textIndex++;
                         charIndex = 0;
                         preloaderTextEl.textContent = '';
+                        // Change text color for final message
+                        if(textIndex === texts.length -1) {
+                            preloaderTextContainer.style.color = '#ffffff';
+                            preloaderTextContainer.style.textShadow = '0 0 8px #ffffff';
+                        }
                         typeText();
-                    }, 1500); // Adjusted pause between lines
+                    }, 2000); // Wait 2s before typing next text
                 }
-            } else {
-                 // Animation finished
-                 cursor.style.display = 'none';
             }
+        }
+        
+        function applyGlitch(isGlitching, duration = 100) {
+             const elementsToGlitch = [preloaderShield, preloaderTextContainer];
+             if(isGlitching) {
+                elementsToGlitch.forEach(el => el.classList.add('glitch'));
+                setTimeout(() => {
+                    elementsToGlitch.forEach(el => el.classList.remove('glitch'));
+                }, duration);
+             } else {
+                 elementsToGlitch.forEach(el => el.classList.remove('glitch'));
+             }
         }
 
         // Preloader Matrix Animation
         let pDrops = [];
         let pFontSize = 12;
         let pColumns = 0;
-        const pCharacters = 'SXC|アイウエオカキクケコサシスセソタチツテトナニヌネノ<>{}[]?#@&%*+01';
+        const pCharacters = 'SXC|アイウエオカキクケコサシスセソタチツテトナニヌネノ<>{}[]?#@&%*+';
 
         function initializePreloaderMatrix() {
             preloaderCanvas.width = window.innerWidth;
@@ -540,7 +548,7 @@
             pCtx.fillRect(0, 0, preloaderCanvas.width, preloaderCanvas.height);
             pCtx.font = `${pFontSize}px Fira Code, monospace`;
             for (let i = 0; i < pDrops.length; i++) {
-                pCtx.fillStyle = Math.random() > 0.95 ? '#9ca3af' : '#c8242c'; // Mostly red with hints of grey
+                pCtx.fillStyle = Math.random() > 0.9 ? '#9ca3af' : '#c8242c';
                 const text = pCharacters.charAt(Math.floor(Math.random() * pCharacters.length));
                 pCtx.fillText(text, i * pFontSize, pDrops[i] * pFontSize);
                 if (pDrops[i] * pFontSize > preloaderCanvas.height && Math.random() > 0.985) {
@@ -565,7 +573,7 @@
                 // Initialize main content animations after preloader
                 initializeMainContentScripts();
 
-            }, 14500); // Total preloader duration: 14.5 seconds
+            }, 10000); // Total preloader duration: 10 seconds
         });
 
 
